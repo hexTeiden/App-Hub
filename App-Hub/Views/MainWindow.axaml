@@ -26,7 +26,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
              <Button Grid.Column="2" Classes="accent"
-                    Content="+ Programm hinzufügen"
+                    Content="+ Add Program"
                     Command="{Binding AddAppCommand}" />
         </Grid>
 
@@ -58,15 +58,22 @@
                             </StackPanel>
                             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6"
                                         VerticalAlignment="Center">
-                                <Button Content="Starten"
-                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).LaunchCommand}"
-                                        CommandParameter="{Binding}" />
-                                <Button Content="Pfad ändern"
-                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ChangePathCommand}"
-                                        CommandParameter="{Binding}" />
-                                <Button Content="Entfernen"
+                                <Button Content="Favorite"
                                         Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).RemoveCommand}"
-                                        CommandParameter="{Binding}" />
+                                        CommandParameter="{Binding}" 
+                                        Classes="appButtons" />
+                                <Button Content="Start"
+                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).LaunchCommand}"
+                                        CommandParameter="{Binding}" 
+                                        Classes="appButtons" />
+                                <Button Content="Change path"
+                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ChangePathCommand}"
+                                        CommandParameter="{Binding}"
+                                        Classes="appButtons" />
+                                <Button Content="Remove"
+                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).RemoveCommand}"
+                                        CommandParameter="{Binding}"
+                                        Classes="appButtons" />
                             </StackPanel>
                         </Grid>
                     </DataTemplate>
