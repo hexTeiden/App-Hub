@@ -29,6 +29,10 @@ public partial class AppEntryViewModel : ViewModelBase
     public string Path => Entry.Path;
     public string? Publisher => Entry.Publisher;
     public DateTime? LastLaunchedAt => Entry.LastLaunchedAt;
+    public bool IsFavorite => Entry.IsFavorite;
+
+    /// <summary>Leerer Stern = kein Favorit, voller Stern = Favorit</summary>
+    public string FavoriteIcon => IsFavorite ? "★" : "☆";
 
     /// <summary>Zweite Zeile in der Liste: Hersteller · zuletzt gestartet</summary>
     public string Subtitle
@@ -36,9 +40,10 @@ public partial class AppEntryViewModel : ViewModelBase
         get
         {
             var parts = new List<string>();
-            if (PathMissing) parts.Add("⚠ Pfad nicht gefunden");
+            if (PathMissing) parts.Add("⚠ path not found!");
             if (!string.IsNullOrEmpty(Publisher)) parts.Add(Publisher);
-            parts.Add(LastLaunchedAt is { } t ? $"Zuletzt gestartet: {t:dd.MM.yyyy HH:mm}" : "Noch nie gestartet");
+            if (string.IsNullOrEmpty(Publisher)) parts.Add("No publisher provided");
+            parts.Add(LastLaunchedAt is { } t ? $"Last started: {t:dd.MM.yyyy HH:mm}" : "Not started before");
             return string.Join(" · ", parts);
         }
     }
@@ -48,6 +53,13 @@ public partial class AppEntryViewModel : ViewModelBase
         Entry.LastLaunchedAt = DateTime.Now;
         OnPropertyChanged(nameof(LastLaunchedAt));
         OnPropertyChanged(nameof(Subtitle));
+    }
+
+    public void ToggleFavorite()
+    {
+        Entry.IsFavorite = !Entry.IsFavorite;
+        OnPropertyChanged(nameof(IsFavorite));
+        OnPropertyChanged(nameof(FavoriteIcon));
     }
 
     public void ChangePath(string newPath, AppInfo info)

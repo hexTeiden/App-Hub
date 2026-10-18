@@ -47,9 +47,9 @@ public partial class MainWindowViewModel : ViewModelBase
     public IReadOnlyList<SortOption> SortOptions { get; } =
     [
         new(SortMode.Name, "Name"),
-        new(SortMode.Recency, "Zuletzt gestartet"),
-        new(SortMode.Publisher, "Hersteller"),
-        new(SortMode.Favorite, "Favoriten")
+        new(SortMode.Recency, "Recently started"),
+        new(SortMode.Publisher, "Publisher"),
+        new(SortMode.Favorite, "Favorites")
     ];
 
     public bool IsEmpty => _allApps.Count == 0;
@@ -66,13 +66,13 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task AddApp()
     {
-        var path = await _filePicker.PickFileAsync("Programm hinzufügen", "Programme", _platform.ProgramFilePatterns);
+        var path = await _filePicker.PickFileAsync("Add programs", "Programs", _platform.ProgramFilePatterns);
         if (path is null)
             return;
 
         if (_allApps.Any(a => string.Equals(a.Path, path, StringComparison.OrdinalIgnoreCase)))
         {
-            StatusMessage = "Dieses Programm ist schon in der Liste.";
+            StatusMessage = "The program has already been added.";
             return;
         }
 
@@ -92,7 +92,7 @@ public partial class MainWindowViewModel : ViewModelBase
         app.Refresh();
         if (app.PathMissing)
         {
-            StatusMessage = $"„{app.Name}“ wurde nicht gefunden. Pfad ändern?";
+            StatusMessage = $"„{app.Name}“ has not been found. Change path?";
             return;
         }
 
@@ -107,14 +107,23 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            StatusMessage = $"„{app.Name}“ konnte nicht gestartet werden: {ex.Message}";
+            StatusMessage = $"„{app.Name}“ couldn't start: {ex.Message}";
         }
+    }
+
+    [RelayCommand]
+    private void ToggleFavorite(AppEntryViewModel app)
+    {
+        app.ToggleFavorite();
+        Save();
+        if (SelectedSortOption.Mode == SortMode.Favorite)
+            ApplyFilterAndSort();
     }
 
     [RelayCommand]
     private async Task ChangePath(AppEntryViewModel app)
     {
-        var path = await _filePicker.PickFileAsync($"Neuer Pfad für „{app.Name}“", "Programme", _platform.ProgramFilePatterns);
+        var path = await _filePicker.PickFileAsync($"New path for „{app.Name}“", "programs", _platform.ProgramFilePatterns);
         if (path is null)
             return;
 
@@ -153,6 +162,9 @@ public partial class MainWindowViewModel : ViewModelBase
                 .OrderBy(a => string.IsNullOrEmpty(a.Publisher)) // Apps ohne Hersteller ans Ende
                 .ThenBy(a => a.Publisher, StringComparer.CurrentCultureIgnoreCase)
                 .ThenBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase),
+            SortMode.Favorite => query
+                .Where(a => a.IsFavorite) // Nur Favoriten anzeigen
+                .OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase),
             _ => query.OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase),
         };
 
@@ -171,7 +183,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Speichern fehlgeschlagen: {ex.Message}";
+            StatusMessage = $"Saving failed: {ex.Message}";
         }
     }
 }

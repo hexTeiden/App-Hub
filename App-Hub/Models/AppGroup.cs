@@ -5,5 +5,5 @@ public class AppGroup
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = "";
-    public List<AppEntry> AppEntry { get; set; } = [];
+    public List<AppEntry> AppEntries { get; set; } = [];
 }

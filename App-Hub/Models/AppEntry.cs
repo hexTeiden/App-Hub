@@ -9,6 +9,7 @@ public class AppEntry
     public string? Publisher { get; set; }
     public DateTime AddedAt { get; set; } = DateTime.Now;
     public DateTime? LastLaunchedAt { get; set; }
+    public bool IsFavorite { get; set; }
 
     /// <summary>Gruppen, in denen die App ist (Side-Feature, noch ohne UI).</summary>
     public List<Guid> GroupIds { get; set; } = [];

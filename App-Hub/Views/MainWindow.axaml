@@ -15,7 +15,7 @@
         <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,12">
             <TextBox Grid.Column="0"
                      Text="{Binding SearchText}"
-                     PlaceholderText="Suchen …" />
+                     PlaceholderText="Searching …" />
             <ComboBox Grid.Column="1" Margin="8,0" MinWidth="180"
                       ItemsSource="{Binding SortOptions}"
                       SelectedItem="{Binding SelectedSortOption}">
@@ -58,9 +58,11 @@
                             </StackPanel>
                             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6"
                                         VerticalAlignment="Center">
-                                <Button Content="Favorite"
-                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).RemoveCommand}"
-                                        CommandParameter="{Binding}" 
+                                <Button Content="{Binding FavoriteIcon}"
+                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ToggleFavoriteCommand}"
+                                        CommandParameter="{Binding}"
+                                        ToolTip.Tip="Favorite"
+                                        FontSize="16"
                                         Classes="appButtons" />
                                 <Button Content="Start"
                                         Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).LaunchCommand}"
