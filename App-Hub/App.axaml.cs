@@ -1,8 +1,12 @@
+using AppHub.Services;
+using AppHub.Services.Platform;
+using AppHub.ViewModels;
+using AppHub.Views;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 
-namespace App_Hub;
+namespace AppHub;
 
 public partial class App : Application
 {
@@ -15,7 +19,12 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow();
+            var window = new MainWindow();
+            window.DataContext = new MainWindowViewModel(
+                new JsonDataStore(),
+                PlatformServices.Create(),
+                new FilePickerService(window));
+            desktop.MainWindow = window;
         }
 
         base.OnFrameworkInitializationCompleted();

@@ -1,7 +1,6 @@
 ﻿using Avalonia;
-using System;
 
-namespace App_Hub;
+namespace AppHub;
 
 class Program
 {
