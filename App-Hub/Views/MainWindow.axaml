@@ -25,7 +25,7 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Button Grid.Column="2" Classes="accent"
+             <Button Grid.Column="2" Classes="accent"
                     Content="+ Programm hinzufügen"
                     Command="{Binding AddAppCommand}" />
         </Grid>

@@ -49,6 +49,7 @@ public partial class MainWindowViewModel : ViewModelBase
         new(SortMode.Name, "Name"),
         new(SortMode.Recency, "Zuletzt gestartet"),
         new(SortMode.Publisher, "Hersteller"),
+        new(SortMode.Favorite, "Favoriten")
     ];
 
     public bool IsEmpty => _allApps.Count == 0;

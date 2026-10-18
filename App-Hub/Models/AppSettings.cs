@@ -5,6 +5,7 @@ public enum SortMode
     Name,
     Recency,
     Publisher,
+    Favorite
 }
 
 public class AppSettings
