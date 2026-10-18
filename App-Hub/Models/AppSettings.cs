@@ -22,4 +22,7 @@ public class AppSettings
     public string Theme { get; set; } = "Relaxed";
     public string? BackgroundImagePath { get; set; }
     public string? FontFamily { get; set; }
+
+    /// <summary>Durchsichtigkeit der Kacheln im Relaxed-Theme in Prozent (0 = undurchsichtig).</summary>
+    public double TileTransparency { get; set; }
 }

@@ -54,6 +54,13 @@
                     <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" />
                 </Transitions>
             </Setter>
+        </Style>
+        <!-- Durchsichtige Kacheln: Schatten weg, sonst scheint er dunkel durch -->
+        <Style Selector="Border.tile.seeThrough">
+            <Setter Property="BoxShadow" Value="0 0 0 0 Transparent" />
+        </Style>
+        <!-- Eigener Hintergrund-Layer, damit nur er durchsichtig wird und nicht Icon/Text -->
+        <Style Selector="Border.tileBackground">
             <Setter Property="Background">
                 <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
                     <GradientStop Offset="0" Color="#3B4758" />
@@ -161,6 +168,15 @@
                                     <Button Content="Remove" Command="{Binding ResetBackgroundCommand}"
                                             IsEnabled="{Binding HasBackgroundImage}" />
                                 </StackPanel>
+
+                                <TextBlock Text="{Binding TileTransparencyLabel}" FontWeight="SemiBold" Margin="0,8,0,0" />
+                                <Slider Minimum="0" Maximum="100"
+                                        TickFrequency="5" IsSnapToTickEnabled="True"
+                                        Value="{Binding TileTransparency}"
+                                        IsEnabled="{Binding IsRelaxed}" />
+                                <TextBlock Text="Only in the Relaxed theme."
+                                           FontSize="12" Opacity="0.6"
+                                           IsVisible="{Binding !IsRelaxed}" />
                             </StackPanel>
                         </Flyout>
                     </Button.Flyout>
@@ -236,8 +252,12 @@
                     </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="vm:AppEntryViewModel">
-                            <Border Classes="tile" ToolTip.Tip="{Binding Path}">
+                            <Border Classes="tile" ToolTip.Tip="{Binding Path}"
+                                    Classes.seeThrough="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).HasTransparentTiles}">
                                 <Panel>
+                                    <Border Classes="tileBackground"
+                                            Opacity="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).TileBackgroundOpacity}" />
+
                                     <!-- Eigenes Bild füllt die ganze Kachel wie ein Cover -->
                                     <Image Source="{Binding CustomImage}" Stretch="UniformToFill"
                                            IsVisible="{Binding HasCustomImage}" />

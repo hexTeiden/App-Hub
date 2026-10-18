@@ -48,6 +48,11 @@ public partial class MainWindowViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(HasBackgroundImage))]
     private Bitmap? _backgroundImage;
 
+    /// <summary>0–100 %, nur für Relaxed.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TileBackgroundOpacity), nameof(HasTransparentTiles), nameof(TileTransparencyLabel))]
+    private double _tileTransparency;
+
     [ObservableProperty]
     private string _searchText = "";
 
@@ -68,6 +73,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _selectedThemeOption = ThemeOptions.FirstOrDefault(o => o.Mode.ToString() == settings.Theme) ?? ThemeOptions[0];
         _selectedFontOption = FontOptions.FirstOrDefault(o => o.Family == settings.FontFamily) ?? FontOptions[0];
         _backgroundImage = ImageLoader.TryLoad(settings.BackgroundImagePath);
+        _tileTransparency = Math.Clamp(settings.TileTransparency, 0, 100);
 
         Groups.Add(new GroupViewModel(null));
         foreach (var group in _data.Groups)
@@ -120,6 +126,19 @@ public partial class MainWindowViewModel : ViewModelBase
         SelectedFontOption.Family is { } family ? new FontFamily(family) : FontFamily.Default;
 
     public bool HasBackgroundImage => BackgroundImage is not null;
+
+    /// <summary>Deckkraft vom Kachel-Hintergrund (Icon, Name und Cover bleiben voll sichtbar).</summary>
+    public double TileBackgroundOpacity => 1 - TileTransparency / 100;
+
+    public bool HasTransparentTiles => TileTransparency > 0;
+
+    public string TileTransparencyLabel => $"Tile transparency: {TileTransparency:0} %";
+
+    partial void OnTileTransparencyChanged(double value)
+    {
+        _data.Settings.TileTransparency = value;
+        Save();
+    }
 
     partial void OnSelectedSortOptionChanged(SortOption value)
     {
