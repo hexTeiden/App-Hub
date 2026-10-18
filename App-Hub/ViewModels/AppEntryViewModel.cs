@@ -1,4 +1,6 @@
+using System.Collections.ObjectModel;
 using AppHub.Models;
+using AppHub.Services;
 using AppHub.Services.Platform;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,7 +13,13 @@ public partial class AppEntryViewModel : ViewModelBase
     private readonly IPlatformService _platform;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayIcon))]
     private Bitmap? _icon;
+
+    /// <summary>Eigenes Bild aus <see cref="AppEntry.ImagePath"/>.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayIcon), nameof(HasCustomImage))]
+    private Bitmap? _customImage;
 
     [ObservableProperty]
     private bool _pathMissing;
@@ -33,6 +41,16 @@ public partial class AppEntryViewModel : ViewModelBase
 
     /// <summary>Leerer Stern = kein Favorit, voller Stern = Favorit</summary>
     public string FavoriteIcon => IsFavorite ? "★" : "☆";
+
+    public bool HasCustomImage => CustomImage is not null;
+
+    /// <summary>Für die Liste: eigenes Bild, sonst Icon aus der Exe.</summary>
+    public Bitmap? DisplayIcon => CustomImage ?? Icon;
+
+    /// <summary>Checkboxen fürs Groups-Menü, werden vom MainWindowViewModel befüllt.</summary>
+    public ObservableCollection<GroupMembershipViewModel> Memberships { get; } = [];
+
+    public bool HasGroups => Memberships.Count > 0;
 
     /// <summary>Zweite Zeile in der Liste: Hersteller · zuletzt gestartet</summary>
     public string Subtitle
@@ -71,11 +89,27 @@ public partial class AppEntryViewModel : ViewModelBase
         OnPropertyChanged(nameof(Publisher));
     }
 
-    /// <summary>Prüft den Pfad und lädt das Icon neu.</summary>
+    /// <summary>null setzt das Bild zurück aufs Exe-Icon.</summary>
+    public void ChangeImage(string? imagePath)
+    {
+        Entry.ImagePath = imagePath;
+        CustomImage = ImageLoader.TryLoad(imagePath);
+    }
+
+    public void SetMemberships(IEnumerable<GroupMembershipViewModel> memberships)
+    {
+        Memberships.Clear();
+        foreach (var m in memberships)
+            Memberships.Add(m);
+        OnPropertyChanged(nameof(HasGroups));
+    }
+
+    /// <summary>Prüft den Pfad und lädt Icon und eigenes Bild neu.</summary>
     public void Refresh()
     {
         PathMissing = !_platform.Exists(Entry.Path);
         Icon = PathMissing ? null : _platform.LoadIcon(Entry.Path);
+        CustomImage = ImageLoader.TryLoad(Entry.ImagePath);
         OnPropertyChanged(nameof(Subtitle));
     }
 }

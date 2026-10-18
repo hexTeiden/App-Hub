@@ -8,12 +8,18 @@ public enum SortMode
     Favorite
 }
 
+public enum ThemeMode
+{
+    Relaxed,
+    Dense
+}
+
 public class AppSettings
 {
     public SortMode SortMode { get; set; } = SortMode.Name;
 
-    // Für die Custom-UI-Features vorbereitet, werden noch nicht verwendet:
-    public string Theme { get; set; } = "Default";
+    /// <summary>Name eines <see cref="ThemeMode"/>. Als String, damit alte Werte wie "Default" data.json nicht kaputt machen.</summary>
+    public string Theme { get; set; } = "Relaxed";
     public string? BackgroundImagePath { get; set; }
     public string? FontFamily { get; set; }
 }

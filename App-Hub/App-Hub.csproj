@@ -7,8 +7,15 @@
     <RootNamespace>AppHub</RootNamespace>
     <AssemblyName>AppHub</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Icon der .exe (Explorer, Desktop-Verknüpfung) -->
+    <ApplicationIcon>Assets\AppHub.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Fenster-Icon (Titelleiste, Taskleiste) -->
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.1.4" />

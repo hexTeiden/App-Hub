@@ -11,6 +11,9 @@ public class AppEntry
     public DateTime? LastLaunchedAt { get; set; }
     public bool IsFavorite { get; set; }
 
-    /// <summary>Gruppen, in denen die App ist (Side-Feature, noch ohne UI).</summary>
+    /// <summary>Eigenes Bild (Cover/Logo) statt dem Icon aus der Exe.</summary>
+    public string? ImagePath { get; set; }
+
+    /// <summary>Gruppen, in denen die App ist.</summary>
     public List<Guid> GroupIds { get; set; } = [];
 }
