@@ -151,12 +151,65 @@ public partial class MainWindowViewModel : ViewModelBase
         if (path is null)
             return;
 
-        if (_allApps.Any(a => string.Equals(a.Path, path, StringComparison.OrdinalIgnoreCase)))
+        if (IsAlreadyAdded(path))
         {
             StatusMessage = "The program has already been added.";
             return;
         }
 
+        AddEntry(path);
+        StatusMessage = null;
+        Save();
+        ApplyFilterAndSort();
+    }
+
+    /// <summary>Für Drag &amp; Drop: fügt alle passenden Programme hinzu, der Rest wird übersprungen.</summary>
+    public void AddDroppedPaths(IEnumerable<string> paths)
+    {
+        int added = 0, duplicates = 0, unsupported = 0;
+
+        foreach (var path in paths)
+        {
+            if (!_platform.Exists(path) || !IsProgramFile(path))
+                unsupported++;
+            else if (IsAlreadyAdded(path))
+                duplicates++;
+            else
+            {
+                AddEntry(path);
+                added++;
+            }
+        }
+
+        var skipped = new List<string>();
+        if (duplicates > 0) skipped.Add($"{duplicates} already added");
+        if (unsupported > 0) skipped.Add($"{unsupported} not a program");
+        StatusMessage = skipped.Count > 0 ? $"Skipped: {string.Join(", ", skipped)}." : null;
+
+        if (added == 0)
+            return;
+
+        Save();
+        ApplyFilterAndSort();
+    }
+
+    /// <summary>
+    /// Prüft die Endung gegen <see cref="IPlatformService.ProgramFilePatterns"/> ("*.exe", "*" = alles).
+    /// Bei Symlinks zählt auch die Endung vom Ziel, damit z.B. ein Link "Game" auf "Game.exe" klappt.
+    /// </summary>
+    private bool IsProgramFile(string path)
+    {
+        var target = LinkResolver.Resolve(path);
+        return _platform.ProgramFilePatterns.Any(p => p == "*"
+            || (p.StartsWith("*.") && (path.EndsWith(p[1..], StringComparison.OrdinalIgnoreCase)
+                                       || target.EndsWith(p[1..], StringComparison.OrdinalIgnoreCase))));
+    }
+
+    private bool IsAlreadyAdded(string path) =>
+        _allApps.Any(a => string.Equals(a.Path, path, StringComparison.OrdinalIgnoreCase));
+
+    private void AddEntry(string path)
+    {
         var info = _platform.ReadInfo(path);
         var entry = new AppEntry { Name = info.Name, Path = path, Publisher = info.Publisher };
 
@@ -168,9 +221,6 @@ public partial class MainWindowViewModel : ViewModelBase
         _data.Apps.Add(entry);
         _allApps.Add(app);
         app.SetMemberships(CreateMemberships(app));
-        StatusMessage = null;
-        Save();
-        ApplyFilterAndSort();
     }
 
     [RelayCommand]

@@ -9,6 +9,7 @@
         Title="App Hub"
         Icon="/Assets/AppHub.ico"
         Width="1000" Height="650" MinWidth="700" MinHeight="400"
+        DragDrop.AllowDrop="True"
         Classes.relaxed="{Binding IsRelaxed}"
         FontFamily="{Binding CurrentFontFamily}">
 
@@ -390,5 +391,15 @@
                 </Panel>
             </Panel>
         </DockPanel>
+
+        <!-- Wird beim Reinziehen von Dateien eingeblendet (siehe MainWindow.axaml.cs) -->
+        <Border x:Name="DropOverlay" IsVisible="False"
+                DragDrop.AllowDrop="True"
+                Background="#C0101418" Margin="8" CornerRadius="8"
+                BorderBrush="#66C0F4" BorderThickness="2">
+            <TextBlock Text="Drop programs here to add them" IsHitTestVisible="False"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       FontSize="20" FontWeight="SemiBold" Foreground="White" />
+        </Border>
     </Panel>
 </Window>
