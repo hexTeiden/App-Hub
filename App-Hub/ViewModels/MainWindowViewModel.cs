@@ -69,16 +69,19 @@ public partial class MainWindowViewModel : ViewModelBase
         _allApps = _data.Apps.Select(a => new AppEntryViewModel(a, _platform)).ToList();
 
         var settings = _data.Settings;
-        _selectedSortOption = SortOptions.First(o => o.Mode == settings.SortMode);
+        // Alte Einstellung "Favorite" gibt's nicht mehr als Sortierung (jetzt eigener Tab) → zurück auf Name
+        _selectedSortOption = SortOptions.FirstOrDefault(o => o.Mode == settings.SortMode) ?? SortOptions[0];
         _selectedThemeOption = ThemeOptions.FirstOrDefault(o => o.Mode.ToString() == settings.Theme) ?? ThemeOptions[0];
         _selectedFontOption = FontOptions.FirstOrDefault(o => o.Family == settings.FontFamily) ?? FontOptions[0];
         _backgroundImage = ImageLoader.TryLoad(settings.BackgroundImagePath);
         _tileTransparency = Math.Clamp(settings.TileTransparency, 0, 100);
 
-        Groups.Add(new GroupViewModel(null));
+        // Oben angepinnt: Favoriten, dann alle Programme, danach die eigenen Gruppen
+        Groups.Add(GroupViewModel.Favorites());
+        Groups.Add(_allGroup);
         foreach (var group in _data.Groups)
-            Groups.Add(new GroupViewModel(group));
-        _selectedGroup = Groups[0];
+            Groups.Add(GroupViewModel.Custom(group));
+        _selectedGroup = _allGroup;
 
         RefreshMemberships();
         ApplyFilterAndSort();
@@ -87,15 +90,16 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Die Apps, die gerade angezeigt werden (gefiltert und sortiert).</summary>
     public ObservableCollection<AppEntryViewModel> Apps { get; } = [];
 
-    /// <summary>Seitenleiste: "All programs" + eigene Gruppen.</summary>
+    /// <summary>Seitenleiste: "★ Favorites", "All programs" + eigene Gruppen.</summary>
     public ObservableCollection<GroupViewModel> Groups { get; } = [];
+
+    private readonly GroupViewModel _allGroup = GroupViewModel.All();
 
     public IReadOnlyList<SortOption> SortOptions { get; } =
     [
         new(SortMode.Name, "Name"),
         new(SortMode.Recency, "Recently started"),
-        new(SortMode.Publisher, "Publisher"),
-        new(SortMode.Favorite, "Favorites")
+        new(SortMode.Publisher, "Publisher")
     ];
 
     public IReadOnlyList<ThemeOption> ThemeOptions { get; } =
@@ -236,6 +240,10 @@ public partial class MainWindowViewModel : ViewModelBase
         if (SelectedGroup?.Group is { } group)
             entry.GroupIds.Add(group.Id);
 
+        // Im Favoriten-Tab hinzugefügt → direkt Favorit, sonst wäre die App gleich wieder unsichtbar
+        if (SelectedGroup?.IsFavorites == true)
+            entry.IsFavorite = true;
+
         var app = new AppEntryViewModel(entry, _platform);
         _data.Apps.Add(entry);
         _allApps.Add(app);
@@ -272,7 +280,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         app.ToggleFavorite();
         Save();
-        if (SelectedSortOption.Mode == SortMode.Favorite)
+        if (SelectedGroup?.IsFavorites == true)
             ApplyFilterAndSort();
     }
 
@@ -337,7 +345,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         var group = new AppGroup { Name = name };
         _data.Groups.Add(group);
-        Groups.Add(new GroupViewModel(group));
+        Groups.Add(GroupViewModel.Custom(group));
         NewGroupName = "";
         StatusMessage = null;
         RefreshMemberships();
@@ -356,7 +364,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         Groups.Remove(groupVm);
         if (SelectedGroup is null || SelectedGroup == groupVm)
-            SelectedGroup = Groups[0];
+            SelectedGroup = _allGroup;
 
         RefreshMemberships();
         Save();
@@ -423,7 +431,9 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         IEnumerable<AppEntryViewModel> query = _allApps;
 
-        if (SelectedGroup?.Group is { } group)
+        if (SelectedGroup?.IsFavorites == true)
+            query = query.Where(a => a.IsFavorite);
+        else if (SelectedGroup?.Group is { } group)
             query = query.Where(a => a.Entry.GroupIds.Contains(group.Id));
 
         if (!string.IsNullOrWhiteSpace(SearchText))
@@ -442,9 +452,6 @@ public partial class MainWindowViewModel : ViewModelBase
                 .OrderBy(a => string.IsNullOrEmpty(a.Publisher)) // Apps ohne Hersteller ans Ende
                 .ThenBy(a => a.Publisher, StringComparer.CurrentCultureIgnoreCase)
                 .ThenBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase),
-            SortMode.Favorite => query
-                .Where(a => a.IsFavorite) // Nur Favoriten anzeigen
-                .OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase),
             _ => query.OrderBy(a => a.Name, StringComparer.CurrentCultureIgnoreCase),
         };
 

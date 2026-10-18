@@ -5,6 +5,8 @@ public enum SortMode
     Name,
     Recency,
     Publisher,
+
+    /// <summary>Veraltet, Favoriten sind jetzt ein eigener Tab. Bleibt drin, damit alte data.json-Dateien noch laden.</summary>
     Favorite
 }
 

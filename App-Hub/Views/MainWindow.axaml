@@ -112,6 +112,9 @@
         <Style Selector="ListBox.groups">
             <Setter Property="Background" Value="Transparent" />
         </Style>
+        <Style Selector="ListBox.groups TextBlock.pinned">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
     </Window.Styles>
 
     <Panel>
@@ -213,7 +216,12 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="vm:GroupViewModel">
                             <Grid ColumnDefinitions="*,Auto">
+                                <!-- Linie zwischen angepinnten Einträgen und eigenen Gruppen -->
+                                <Border Grid.ColumnSpan="2" Height="1" Margin="-12,0,-12,-12"
+                                        VerticalAlignment="Bottom" Background="Gray" Opacity="0.4"
+                                        IsVisible="{Binding ShowSeparator}" />
                                 <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                                           Classes.pinned="{Binding IsPinned}"
                                            TextTrimming="CharacterEllipsis" />
                                 <Button Grid.Column="1" Classes="deleteGroup"
                                         Content="✕" Padding="6,0" FontSize="11"
